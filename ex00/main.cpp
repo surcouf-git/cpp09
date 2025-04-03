@@ -1,6 +1,8 @@
 #include "BitcoinExchange.hpp"
 #include <iostream>
 
+s_data	data;
+
 int	main(int argc, char **argv) 
 {
 	if (argc != 2) {
