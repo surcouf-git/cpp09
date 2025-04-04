@@ -75,7 +75,7 @@ float	BitcoinExchange::extract_mutliplier(std::string &s_multiplier, const int &
 	}
 	multiplier = std::atof(s_multiplier.c_str());
 	if (multiplier < 0 || multiplier > std::numeric_limits<int>::max()) {
-		(multiplier < 0) ? msg = "Error: not a positive number." : "Error: too large a number.";
+		msg = (multiplier < 0) ? "Error: not a positive number." : "Error: too large a number.";
 		this->_input.insert(std::make_pair(count, new_data(msg, -1.0f)));
 		throw (-1);
 	}
@@ -99,25 +99,22 @@ bool	BitcoinExchange::isInt(const std::string &string) {
 }
 
 bool	BitcoinExchange::isFloat(const std::string &string) {
-	size_t		i = 0;
-	bool		hasDecimal = false;
-	std::string	tmp = string.substr(0, string.length() - 1);
+	size_t	i = 0;
+	bool	hasDecimal = false;
 
 	if (string.empty())
 		return false;
-	if (string == "nanf" || string == "+inff" || string == "-inff")
+	if (string == "nan" || string == "+inf" || string == "-inf")
 		return true;
-	if (string[string.length() - 1] != 'f')
-		return false;
-	if (tmp[0] == '+' || tmp[0] == '-')
+	if (string[0] == '+' || string[0] == '-')
 		i = 1;
-	if (i == tmp.length())
+	if (i == string.length())
 		return false;
-	for (; i < tmp.length(); i++) {
-		if (tmp[i] == '.' && !hasDecimal) {
+	for (; i < string.length(); i++) {
+		if (string[i] == '.' && !hasDecimal) {
 			hasDecimal = true;
-		} else if (!isdigit(tmp[i])) {
-			return (false);
+		} else if (!isdigit(string[i])) {
+			return false;
 		}
 	}
 	return (hasDecimal);
@@ -163,8 +160,12 @@ void	BitcoinExchange::check_format(std::string &date, const int &count) {
 	}
 	while (std::getline(stream, line, '-')) {
 		tab[i] = line;
-		for (size_t i = 0; i < line.length(); i++) {
-			if (!std::isdigit(line.at(i))) {
+		for (size_t o = 0; o < line.length(); o++) {
+			if (line.at(o) == '.') {
+				o++;
+				continue ;
+			}
+			if (!std::isdigit(line.at(o))) {
 				this->_input.insert(std::make_pair(count, new_data("Error: bad input => " + date, -1.0f)));
 				throw (-1);
 			}
@@ -203,6 +204,7 @@ void	BitcoinExchange::parse_line(std::string current_line, const int &count) {
 	s_multiplier = current_line.substr(pipe_pos, current_line.find_last_not_of(" \t\n\r\f\v"));
 	this->delete_whitespaces(s_multiplier);
 	multiplier = this->extract_mutliplier(s_multiplier, count);
+	//remplir map
 	this->_input.insert(std::make_pair(count, new_data(date + " => ", multiplier)));
 }
 
