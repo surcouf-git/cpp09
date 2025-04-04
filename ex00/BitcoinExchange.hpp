@@ -23,6 +23,7 @@ class BitcoinExchange
 		bool			isInt(const std::string &string);
 		bool			isFloat(const std::string &string);
 		void			delete_whitespaces(std::string &string);
+		void			check_format(std::string &date, const int &count);
 		static t_data	*new_data(const std::string &str, float multiplier);
 		void			parse_line(std::string current_line, const int &count);
 		float			extract_mutliplier(std::string &s_multiplier, const int &count);

@@ -33,12 +33,22 @@ t_data	*BitcoinExchange::new_data(const std::string &str, float multiplier) {
 }
 
 void	BitcoinExchange::find_and_display(void) {
-	std::map<int, t_data*>::iterator	_input_it = this->_input.begin();
+	float										result;
+	std::map<std::string, float>::iterator		_csv_it = this->_csv.begin();
+	std::map<int, t_data*>::iterator			_input_it = this->_input.begin();
 
 	for (; _input_it != this->_input.end(); ++_input_it) {
-		if (_input_it->second->str.substr(0, 5) == "Error")
-			std::cout	<< "found: ";
-		std::cout	<< _input_it->second->str << '\n';
+		if (_input_it->second->str.substr(0, 5) != "Error") {
+			for (_csv_it = this->_csv.begin(); _csv_it != this->_csv.end(); ++_csv_it) {
+				if (_input_it->second->str <= _csv_it->first) {
+					result = (_input_it->second->multiplier * _csv_it->second);
+					std::cout	<< _input_it->second->str << "-" << result << '\n';
+					break ;
+				}
+			}
+		} else {
+			std::cout	<< _input_it->second->str << '\n';
+		}
 	}
 }
 
@@ -53,8 +63,6 @@ void	BitcoinExchange::get_csv_values(void) {
 		value = std::strtof(line.substr(line.find(",") + 1).c_str(), NULL);
 		this->_csv.insert(std::make_pair(line.substr(0, line.find(",")), value));
 	}
-	// for (std::map<std::string, float>::iterator it = this->_csv.begin(); it != this->_csv.end(); ++it) {
-	// }
 }
 
 float	BitcoinExchange::extract_mutliplier(std::string &s_multiplier, const int &count) {
@@ -62,7 +70,7 @@ float	BitcoinExchange::extract_mutliplier(std::string &s_multiplier, const int &
 	double	multiplier;
 
 	if (!isInt(s_multiplier) && !isFloat(s_multiplier)) {
-		this->_input.insert(std::make_pair(count, new_data("Error: bad input => " + s_multiplier + " -line:", -1.0f)));
+		this->_input.insert(std::make_pair(count, new_data("Error: bad input => " + s_multiplier, -1.0f)));
 		throw (-1);
 	}
 	multiplier = std::atof(s_multiplier.c_str());
@@ -120,7 +128,7 @@ size_t	BitcoinExchange::find_pipe(std::string	&date, std::string &current_line, 
 
 	pipe_pos = current_line.find('|');
 	if (pipe_pos == std::string::npos) {
-		this->_input.insert(std::make_pair(count, new_data("Error: bad input => " + current_line + " -line:", -1.0f)));
+		this->_input.insert(std::make_pair(count, new_data("Error: bad input => " + current_line, -1.0f)));
 		throw (-1);
 	}
 	date = current_line.substr(current_line.find_first_not_of(" "), pipe_pos);
@@ -134,8 +142,41 @@ void	BitcoinExchange::delete_whitespaces(std::string &string) {
 	if (start != std::string::npos) {
 		string = string.substr(start, end - start + 1);
 	} else {
-		this->_input.insert(std::make_pair(-1.0f, new_data("Error: bad input => " + string + " -line:", -1.0f))); // EXPRESSION MANQUANTE
+		this->_input.insert(std::make_pair(-1.0f, new_data("Error: bad input => " + string, -1.0f))); // EXPRESSION MANQUANTE
 		throw (-1);
+	}
+}
+
+void	BitcoinExchange::check_format(std::string &date, const int &count) {
+	int					i = 0;
+	int					value;
+	std::stringstream	stream(date);
+	std::string			tab[3], line;
+
+	if (date.at(4) != '-' || date.at(7) != '-') {
+		this->_input.insert(std::make_pair(count, new_data("Error: bad input => " + date, -1.0f)));
+		throw (-1);
+	}
+	if (date > "2022-03-25") {
+		this->_input.insert(std::make_pair(count, new_data("Error: bad input => " + date, -1.0f)));
+		throw (-1);
+	}
+	while (std::getline(stream, line, '-')) {
+		tab[i] = line;
+		value = std::atoi(line.c_str());
+		if (i == 0 && (line.length() != 4 || value > 2022 || value < 0)) {
+			this->_input.insert(std::make_pair(count, new_data("Error: bad input => " + date, -1.0f)));
+			throw (-1);
+		}
+		if (i == 1 && (line.length() != 2 || value > 12 || value < 0)) {
+			this->_input.insert(std::make_pair(count, new_data("Error: bad input => " + date, -1.0f)));
+			throw (-1);
+		}
+		if (i == 2 && (line.length() != 2 || value > 31 || value < 0)) {
+			this->_input.insert(std::make_pair(count, new_data("Error: bad input => " + date, -1.0f)));
+			throw (-1);
+		}
+		i++;
 	}
 }
 
@@ -148,14 +189,15 @@ void	BitcoinExchange::parse_line(std::string current_line, const int &count) {
 	pipe_pos = this->find_pipe(date, current_line, count);
 	this->delete_whitespaces(date);
 	if (date.length() != 10) {
-		this->_input.insert(std::make_pair(count, new_data("Error: bad input => " + date + " -line:", -1.0f)));
+		this->_input.insert(std::make_pair(count, new_data("Error: bad input => " + date, -1.0f)));
 		throw (-1);
 	}
+	this->check_format(date, count);
 	//extraire la valeur
 	s_multiplier = current_line.substr(pipe_pos, current_line.find_last_not_of(" \t\n\r\f\v"));
 	this->delete_whitespaces(s_multiplier);
 	multiplier = this->extract_mutliplier(s_multiplier, count);
-	this->_input.insert(std::make_pair(count, new_data(date + " => " + s_multiplier, multiplier)));
+	this->_input.insert(std::make_pair(count, new_data(date + " => ", multiplier)));
 }
 
 void	BitcoinExchange::fill_input_map(void) {
@@ -172,9 +214,9 @@ void	BitcoinExchange::fill_input_map(void) {
 			this->parse_line(current_line, count);
 		} catch (int) {}
 	}
-/* 	for (std::map<float, t_data*>::iterator it = this->_input.begin(); it != this->_input.end(); ++it) {
-		std::cout	 << it->second->str << " " << it->first << '\n';
-	} */
+	// for (std::map<int, t_data*>::iterator it = this->_input.begin(); it != this->_input.end(); ++it) {
+	// 	std::cout	 << it->second->str << '\n';
+	// }
 }
 
 void	BitcoinExchange::handleInfile(std::string infile) {
