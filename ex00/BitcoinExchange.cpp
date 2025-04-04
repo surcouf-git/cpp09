@@ -42,7 +42,7 @@ void	BitcoinExchange::find_and_display(void) {
 			for (_csv_it = this->_csv.begin(); _csv_it != this->_csv.end(); ++_csv_it) {
 				if (_input_it->second->str <= _csv_it->first) {
 					result = (_input_it->second->multiplier * _csv_it->second);
-					std::cout	<< _input_it->second->str << "-" << result << '\n';
+					std::cout	<< _input_it->second->str << " " << result << '\n';
 					break ;
 				}
 			}
@@ -163,6 +163,12 @@ void	BitcoinExchange::check_format(std::string &date, const int &count) {
 	}
 	while (std::getline(stream, line, '-')) {
 		tab[i] = line;
+		for (size_t i = 0; i < line.length(); i++) {
+			if (!std::isdigit(line.at(i))) {
+				this->_input.insert(std::make_pair(count, new_data("Error: bad input => " + date, -1.0f)));
+				throw (-1);
+			}
+		}
 		value = std::atoi(line.c_str());
 		if (i == 0 && (line.length() != 4 || value > 2022 || value < 0)) {
 			this->_input.insert(std::make_pair(count, new_data("Error: bad input => " + date, -1.0f)));
