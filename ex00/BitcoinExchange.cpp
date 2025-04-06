@@ -6,13 +6,11 @@
 #include <cstdlib>
 #include <limits>
 
-#define	line_error 
-
 BitcoinExchange::BitcoinExchange(void) {}
 
 BitcoinExchange::~BitcoinExchange(void) {}
 
-BitcoinExchange::BitcoinExchange(const BitcoinExchange &other) : _csv(other._csv){}
+BitcoinExchange::BitcoinExchange(const BitcoinExchange &other) : _csv(other._csv), _input(other._input) {}
 
 BitcoinExchange	&BitcoinExchange::operator=(const BitcoinExchange &other) {
 	if (this != &other) {
@@ -28,7 +26,6 @@ t_data	*BitcoinExchange::new_data(const std::string &str, float multiplier) {
 	t_data *data = new t_data;
 	data->str = str;
 	data->multiplier = multiplier;
-	data->value = 0;
 	return (data);
 }
 
@@ -41,8 +38,10 @@ void	BitcoinExchange::find_and_display(void) {
 		if (_input_it->second->str.substr(0, 5) != "Error") {
 			for (_csv_it = this->_csv.begin(); _csv_it != this->_csv.end(); ++_csv_it) {
 				if (_input_it->second->str <= _csv_it->first) {
+					if (_input_it->second->str != _csv_it->first)
+						--_csv_it;
 					result = (_input_it->second->multiplier * _csv_it->second);
-					std::cout	<< _input_it->second->str << " " << result << '\n';
+					std::cout	<< _input_it->second->str << " => " << result << '\n';
 					break ;
 				}
 			}
@@ -74,7 +73,7 @@ float	BitcoinExchange::extract_mutliplier(std::string &s_multiplier, const int &
 		throw (-1);
 	}
 	multiplier = std::atof(s_multiplier.c_str());
-	if (multiplier < 0 || multiplier > std::numeric_limits<int>::max()) {
+	if (multiplier < 0 || multiplier > std::numeric_limits<int>::max() || multiplier > 1000) {
 		msg = (multiplier < 0) ? "Error: not a positive number." : "Error: too large a number.";
 		this->_input.insert(std::make_pair(count, new_data(msg, -1.0f)));
 		throw (-1);
@@ -205,7 +204,7 @@ void	BitcoinExchange::parse_line(std::string current_line, const int &count) {
 	this->delete_whitespaces(s_multiplier);
 	multiplier = this->extract_mutliplier(s_multiplier, count);
 	//remplir map
-	this->_input.insert(std::make_pair(count, new_data(date + " => ", multiplier)));
+	this->_input.insert(std::make_pair(count, new_data(date, multiplier)));
 }
 
 void	BitcoinExchange::fill_input_map(void) {

@@ -6,7 +6,6 @@
 typedef struct	s_data {
 	std::string	str;
 	float		multiplier;
-	float		value;
 }	t_data;
 
 class BitcoinExchange
