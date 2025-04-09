@@ -138,7 +138,7 @@ void	BitcoinExchange::delete_whitespaces(std::string &string) {
 	if (start != std::string::npos) {
 		string = string.substr(start, end - start + 1);
 	} else {
-		this->_input.insert(std::make_pair(-1.0f, new_data("Error: bad input => " + string, -1.0f))); // EXPRESSION MANQUANTE
+		this->_input.insert(std::make_pair(-1.0f, new_data("Error: bad input => " + string, -1.0f)));
 		throw (-1);
 	}
 }
@@ -170,7 +170,7 @@ void	BitcoinExchange::check_format(std::string &date, const int &count) {
 			}
 		}
 		value = std::atoi(line.c_str());
-		if (i == 0 && (line.length() != 4 || value > 2022 || value < 0)) {
+		if (i == 0 && (line.length() != 4 || value > 2022 || value < 2009 || value < 0)) {
 			this->_input.insert(std::make_pair(count, new_data("Error: bad input => " + date, -1.0f)));
 			throw (-1);
 		}
@@ -221,9 +221,6 @@ void	BitcoinExchange::fill_input_map(void) {
 			this->parse_line(current_line, count);
 		} catch (int) {}
 	}
-	// for (std::map<int, t_data*>::iterator it = this->_input.begin(); it != this->_input.end(); ++it) {
-	// 	std::cout	 << it->second->str << '\n';
-	// }
 }
 
 void	BitcoinExchange::handleInfile(std::string infile) {
