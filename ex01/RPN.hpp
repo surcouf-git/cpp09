@@ -12,8 +12,9 @@
 class RPN
 {
 	private:
-		std::stack<char*>	_stack;
-		std::stack<int>		_result;
+		std::stack<int>	_stack;
+		std::stack<std::string>	_stringStack;
+		std::stack<int>			_result;
 
 		void	_do_(void);
 		void	_swap_(const char c);

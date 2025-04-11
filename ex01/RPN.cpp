@@ -17,7 +17,7 @@ void	RPN::_parse_(std::string &line) {
 		throw (std::runtime_error("Error"));
 	for (size_t i = 0; i < line.length(); i++) {
 		if (i != 0 && i % 2 != 0)
-			if (line.at(i) != ' ')
+			if (line.at(i) != ' ' || line.at(i) != '-')
 				throw (std::runtime_error("Error"));
 	}
 	for (size_t i = 0; i < line.length(); i++) {
@@ -35,20 +35,25 @@ void	RPN::_parse_(std::string &line) {
 }
 
 void	RPN::parse_fill_do(std::string &line) {
-	int		count = 0;
-	(void)count;
+	std::stringstream	stream;
+	std::string			nwline;
+	int					checker = 0;
+
+	while (std::getline(stream, nwline, ' ')) {
+
+	}
+/* 	int		digit = 0;
 	std::string	operators = "/*-+ ";
 
 	this->_parse_(line);
-	// std::cout << chars << '\n';
 	for (int i = (line.length() - 1); i >= 0; i--) {
-		count++;
 		if (operators.find(line.at(i)) != std::string::npos) {
 			if (line.at(i) != ' ') {
-				if (i < 2)
+				if (std::isdigit(line.at(i)))
+					digit++;
+				else if (digit < 2)
 					throw (std::runtime_error("Error"));
-				count++;
-				this->_stack.push(chars);
+				this->_stack.push(line.at(i));
 			}
 			continue ;
 		}
@@ -57,7 +62,7 @@ void	RPN::parse_fill_do(std::string &line) {
 		else
 			throw (std::runtime_error("Error"));
 	}
-	this->_do_();
+	this->_do_(); */
 	// for (;!this->_stack.empty();) {
 	// 	std::cout	<< this->_stack.top() << "";
 	// 	this->_stack.pop();
