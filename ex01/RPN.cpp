@@ -9,105 +9,97 @@ RPN::~RPN(void) {}
 RPN	RPN::operator=(const RPN &other) { (void)other; return (*this); }
 
 void	RPN::_parse_(std::string &line) {
-	int			sign = 0;
-	int			digit = 0;
-	std::string	operators = "/*-+";
+	std::string			nwline;
+	std::stringstream	stream(line);
+	std::string			operators = "/*-+";
+	int					operat = 0, number = 0, start = 0;
 
-	if (line.length() < 3)
-		throw (std::runtime_error("Error"));
-	for (size_t i = 0; i < line.length(); i++) {
-		if (i != 0 && i % 2 != 0)
-			if (line.at(i) != ' ' || line.at(i) != '-')
+	while (std::getline(stream, nwline, ' ')) {
+		start++;
+		operat = 0;
+		number = 0;
+		for (size_t i = 0; i < nwline.length(); i++) {
+			if (operators.find(nwline.at(i)) != std::string::npos)
+				operat++;
+			else if (std::isdigit(nwline.at(i)))
+				number++;
+			else
 				throw (std::runtime_error("Error"));
+			if (number != 0 && operat > 1)
+				throw (std::runtime_error("Error"));
+		}
+		if (number == 0 && operat != 0 && start < 3) 
+			throw (std::runtime_error("Error"));
+		if (number > 1)
+			throw (std::runtime_error("Error"));
+		this->_stringStack.push(nwline);
 	}
-	for (size_t i = 0; i < line.length(); i++) {
-		if (std::isdigit(line.at(i))) {
-			digit++;
-			continue ;
+	if (this->_stringStack.size() < 3)
+		throw (std::runtime_error("Error"));
+}
+
+void	RPN::_fill_(void) {
+	for (;!this->_stringStack.empty();) {
+		this->_revStringStack.push(this->_stringStack.top());
+		this->_stringStack.pop();
+	}
+}
+
+int		RPN::_calculate_(int n1, int n2, char operat) {
+	if (operat == '/')
+		return (n1 / n2);
+	else if (operat == '*')
+		return (n1 * n2);
+	else if (operat == '-')
+		return (n1 - n2);
+	else if (operat == '+')
+		return (n1 + n2);
+	return (-2147483648);
+}
+
+void	RPN::_do_(void) {
+	std::string	node;
+	std::string	operators = "/*-+";
+	int			digit = 0, operat = 0, n1 = 0, n2 = 0;
+
+	for (;!this->_revStringStack.empty();) {
+		digit = 0, operat = 0;
+		node = this->_revStringStack.top();
+		for (size_t i = 0; i < node.length(); i++) {
+			if (operators.find(node.at(i)) != std::string::npos)
+				operat++;
+			if (std::isdigit(node.at(i)))
+				digit++;
 		}
-		if (operators.find(line.at(i)) != std::string::npos) {
-			if (digit < 2)
+		if (!digit && operat) {
+			if (this->_resultStack.size() < 2)
 				throw (std::runtime_error("Error"));
-			sign++;
-			continue ;
+			else {
+				for (size_t i = 0; i < node.length(); i++) {
+					if (this->_resultStack.size() < 2)
+						throw (std::runtime_error("Error"));
+					n2 = this->_resultStack.top();
+					this->_resultStack.pop();
+					n1 = this->_resultStack.top();
+					this->_resultStack.pop();
+					this->_resultStack.push(this->_calculate_(n1, n2, node.at(i)));
+				}
+				this->_revStringStack.pop();
+				continue ;
+			}
 		}
+		this->_resultStack.push(std::atoi(this->_revStringStack.top().c_str()));
+		this->_revStringStack.pop();
 	}
 }
 
 void	RPN::parse_fill_do(std::string &line) {
-	std::stringstream	stream;
-	std::string			nwline;
-	int					checker = 0;
-
-	while (std::getline(stream, nwline, ' ')) {
-
-	}
-/* 	int		digit = 0;
-	std::string	operators = "/*-+ ";
-
 	this->_parse_(line);
-	for (int i = (line.length() - 1); i >= 0; i--) {
-		if (operators.find(line.at(i)) != std::string::npos) {
-			if (line.at(i) != ' ') {
-				if (std::isdigit(line.at(i)))
-					digit++;
-				else if (digit < 2)
-					throw (std::runtime_error("Error"));
-				this->_stack.push(line.at(i));
-			}
-			continue ;
-		}
-		if (std::isdigit(line.at(i)))
-			this->_stack.push(chars);
-		else
-			throw (std::runtime_error("Error"));
-	}
-	this->_do_(); */
-	// for (;!this->_stack.empty();) {
-	// 	std::cout	<< this->_stack.top() << "";
-	// 	this->_stack.pop();
-	// }
-}
-
-void	RPN::_swap_(const char c) {
-	int	n1, n2 = 0;
-
-	n1 = this->_result.top();
-	std::cout	<< ">" << this->_result.top() << "<\n";
-	this->_result.pop();
-	std::cout	<< ">" << this->_result.top() << "<\n";
-	n2 = this->_result.top();
-	this->_result.pop();
-	std::cout	<< ">" << n1 << ' ' << n2 << "<\n";
-	if (c == '/')
-		this->_result.push(n1 / n2);
-	else if (c == '*')
-		this->_result.push(n1 * n2);
-	this->_stack.pop();
-}
-
-void	RPN::_do_(void) {
-
-	std::cout	<< static_cast<int>(std::atol(this->_stack.top())) << '\n';
-	this->_stack.pop();
-	// std::string	test(&this->_stack.top());
-	std::cout << ">" << this->_stack.top() << '\n';
-	std::cout	<< std::atol(this->_stack.top()) << '\n';
-	this->_stack.pop();
-	std::cout	<< &this->_stack.top() << '\n';
-	exit (0);
-	for (;!this->_stack.empty();) {
-		if (this->_stack.top()[0] == '/')
-			this->_swap_('/');
-		else if (this->_stack.top()[0] == '*')
-			this->_swap_('*');
-		else {
-			this->_result.push(static_cast<int>(std::atol(this->_stack.top())));
-			this->_stack.pop();
-		}
-	}
-	for (;!this->_result.empty();) {
-		std::cout	<< this->_result.top() << " ";
-		this->_result.pop();
-	}
+	this->_fill_();
+	this->_do_();
+	
+	if (this->_resultStack.size() > 1)
+		throw (std::runtime_error("Error"));
+	std::cout	<< this->_resultStack.top() << '\n';
+	this->_resultStack.pop();
 }
