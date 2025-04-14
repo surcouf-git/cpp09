@@ -1,9 +1,9 @@
-NAME = RPN
+NAME = PmergeMe
 
 CPP = c++
 CPPFLAGS = -Wall -Wextra -Werror -std=c++98 -g # -fsanitize=address -fno-omit-frame-pointer
 
-SRCS = RPN.cpp main.cpp
+SRCS = PmergeMe.cpp main.cpp
 OBJ_DIR = obj
 OBJS = $(addprefix $(OBJ_DIR)/, $(SRCS:.cpp=.o))
 

@@ -16,8 +16,7 @@ void	RPN::_parse_(std::string &line) {
 
 	while (std::getline(stream, nwline, ' ')) {
 		start++;
-		operat = 0;
-		number = 0;
+		operat = 0, number = 0;
 		for (size_t i = 0; i < nwline.length(); i++) {
 			if (operators.find(nwline.at(i)) != std::string::npos)
 				operat++;
