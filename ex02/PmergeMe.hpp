@@ -13,10 +13,13 @@ class PmergeMe
 		std::list<int>		_list;
 		std::vector<int>	_vector;
 		char				**_argv;
+		void				_sort_(void);
 		void				_parse_(void);
 		void				_is_usable_(void);
 		void				_split_(std::vector<int> &vec);
+		void				_vec_make_pairs_(std::vector<int> &vec_max, std::vector<int> &vec_min);
 		void				_sort_back_(std::vector<int> &vec, std::vector<int> &vec1, std::vector<int> &vec2);
+		// void				_make_pairs_(std::vector<std::pair<int, int>> &vec_pair, std::list<std::pair<int, int>> &list_pair);
 
 	public:
 		PmergeMe(void);
@@ -25,5 +28,5 @@ class PmergeMe
 		~PmergeMe(void);
 		PmergeMe	&operator=(const PmergeMe &other);
 
-		void	_sort_(void);
+		void	_launch_(void);
 };
