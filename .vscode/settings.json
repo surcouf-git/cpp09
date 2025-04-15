@@ -78,6 +78,7 @@
 		"thread": "cpp",
 		"semaphore": "cpp",
 		"__nullptr": "cpp",
-		"__tree": "cpp"
+		"__tree": "cpp",
+		"list": "cpp"
 	}
 }
