@@ -10,6 +10,8 @@ PmergeMe::PmergeMe(const PmergeMe &other) { (void)other; }
 
 PmergeMe::~PmergeMe(void) {}
 
+PmergeMe	&PmergeMe::operator=(const PmergeMe &other) { (void)other; return (*this); }
+
 void	PmergeMe::_sort_back_(std::vector<int> &vec, std::vector<int> &vec1, std::vector<int> &vec2) {
 	size_t	one = 0, two = 0, three = 0, vec1_size = vec1.size(), vec2_size = vec2.size();
 
@@ -64,63 +66,44 @@ void	PmergeMe::_parse_(void) {
 		throw (std::runtime_error("Error"));
 }
 
+void	swap_range(std::vector<int> &vector, size_t end, size_t pair_size, size_t start) {
+	std::vector<int>	swapper;
 
-void	PmergeMe::_vec_make_pairs_(std::vector<int> &vec_max, std::vector<int> &vec_min) {
-	int	a = 0, b = 0;
+	while (start < (end + 1)) {
+		swapper.push_back(vector[start]);
+		vector[start] = vector[start + pair_size];
+		start++;
+	}
 
-	if (this->_vector.size() % 2 != 0) {
-		this->_vector.push_back(-1);
+	for (size_t i = (end + 1), range = 0; range < pair_size; i++, range++) {
+		vector.at(i) = swapper.at(range);
 	}
-	for (size_t i = 0; i < this->_vector.size(); i += 2) {
-		a = this->_vector[i];
-		b = this->_vector[i + 1];
-		if (a < b) {
-			vec_max.push_back(b);
-			vec_min.push_back(a);
-		} else if (a > b) {
-			vec_max.push_back(a);
-			vec_min.push_back(b);
-		}
+}
+
+void	PmergeMe::_vec_make_pairs_(std::vector<int> &vector, size_t pair_size) {
+	if (pair_size > (vector.size() / 2)) {
+		return ;
 	}
+	int		number;
+	size_t	end = (pair_size - 1), start = 0;
+
+	while ((end + pair_size) < vector.size()) {
+		if (vector[end] > vector[end + pair_size])
+			swap_range(vector, end, pair_size, ((end + 1) - pair_size));
+		end += pair_size;
+	}
+	this->_vec_make_pairs_(vector, pair_size * 2);
 }
 
 void	PmergeMe::_sort_(void) {
 	std::vector<int>	vec_max, vec_min;
-
-
-	this->_vec_make_pairs_(vec_max, vec_min);
-	this->_recursive_(vec_max);
+	this->_vec_make_pairs_(this->_vector, 2);
+	for (size_t i = 0; i < this->_vector.size(); i++)
+		std::cout	<< this->_vector[i];
 }
 
 
 void	PmergeMe::_launch_(void) {
 	this->_parse_();
 	this->_sort_();
-	// try {
-	// 	for (size_t p = 0; p < this->_vector.size(); p++) {
-	// 		std::cout	<< this->_vector.at(p) << '\n';
-	// 	}
-	// } catch (std::exception &e) {
-	// 	std::cout	<< e.what() << '\n';
-	// }
 }
-
-
-/* void	PmergeMe::_make_pairs_(std::vector<std::pair<int, int>> &vec_pair, std::list<std::pair<int, int>> &list_pair) {
-	int	a = 0, b = 0;
-
-	if (this->_vector.size() % 2 != 0) {
-		this->_vector.push_back(-1);
-	}
-	for (size_t i = 0; i < this->_vector.size(); i += 2) {
-		a = this->_vector[i];
-		b = this->_vector[i + 1];
-		if (a < b) {
-			vec_pair.push_back(std::make_pair(a, b));
-			list_pair.push_back(std::make_pair(a, b));
-		} else if (b < a) {
-			vec_pair.push_back(std::make_pair(b, a));
-			list_pair.push_back(std::make_pair(b, a));
-		}
-	}
-} */
