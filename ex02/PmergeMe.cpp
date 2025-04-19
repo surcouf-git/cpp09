@@ -68,36 +68,55 @@ void	PmergeMe::_vec_make_pairs_(std::vector<int> &vector, size_t pair_size) {
 int	prochain_jacobsthal_efficace(int j_n, int n) { return (2 * j_n + static_cast<int>(pow(-1, n))); }
 int	count = 0;
 void	PmergeMe::_sort_back_(std::vector<int> &vector, size_t pair_size) {
-	std::vector<int>	pend, main, b;
-	size_t				i = pair_size, pair = 0, original_size = vector.size();
-	int					j_n = 1, n = 3, actual, range;
+	std::vector<int>::iterator	it;
+	std::vector<int>			pend, main, temp_vec, b;
+	size_t						start = pair_size, pair = 0, original_size = vector.size();
+	int							j_n = 1, n = 4, b_count = 2, i = 0, temp_saver, actual, range;
 
-	while (i < vector.size()) {
+	while (start < vector.size()) {
 		if (pair == 0 || (pair % 2 != 0)) {
-			for (size_t o = (i - pair_size); o < i; o++) {
+			for (size_t o = (start - pair_size); o < start; o++) {
 				main.push_back(vector[o]);
 			}
 		} else if (pair % 2 == 0) {
-			for (size_t o = (i - pair_size); o < i; o++) {
+			for (size_t o = (start - pair_size); o < start; o++) {
 				pend.push_back(vector[o]);
 			}
-			b.push_back(pair);
+			b.push_back(b_count++);
 		}
-		i += pair_size;
+		start += pair_size;
 		pair++;
 	}
-	/*Creation d'un vecteur contenant 2, 3, 4... (b2, b3, b4...)
+	/* Creation d'un vecteur contenant 2, 3, 4... (b2, b3, b4...)
 	 * le but etant de me servir de ce vecteur comme repaire pour
 	 * l'insertion des ranges selon la suite de jacob
-	 * reste a trouver comment se servir de jacob pour l'insertion binaire*/
-	i = pair_size;
-	while (vector.size() != original_size) {
-		i = pair_size;
-		actual = prochain_jacobsthal_efficace(j_n, n);
-		range = actual - j_n;
-		break ;
+	 * reste a trouver comment se servir de jacob pour l'insertion binaire */
+	int p = 0;
+	if (count == 1) {
+		while (!b.empty()) {
+			actual = prochain_jacobsthal_efficace(j_n, n);
+			range = actual - j_n;
+			j_n = actual;
+			actual -= 1;
+			while (actual > 0) {
+				start = actual * pair_size - pair_size;
+				while (start < actual * pair_size) {
+					temp_vec.push_back(pend[start]);
+					start++;
+				}
+				it = std::lower_bound(vector.begin(), vector.end(), *temp_vec.end());
+				vector.insert(it, temp_vec.begin(), temp_vec.end());
+				temp_vec.clear();
+				// b.pop_back();
+				actual--;
+				for (size_t i = 0; i < vector.size(); i++) {
+					std::cout	<< vector.at(i) << ' ';
+				}
+				exit (0);
+			}
+		}
+		exit (0);
 	}
-	exit (0);
 	count++;
 	// j(n), precedente valeur de jacob, index qui correspond a J(n)
 	// std::cout	<< "pair size: " << pair_size << ";\npending  : ";
