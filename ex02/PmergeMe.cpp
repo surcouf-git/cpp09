@@ -65,58 +65,102 @@ void	PmergeMe::_vec_make_pairs_(std::vector<int> &vector, size_t pair_size) {
 	this->_sort_back_(vector, pair_size);
 }
 
-int	prochain_jacobsthal_efficace(int j_n, int n) { return (2 * j_n + static_cast<int>(pow(-1, n))); }
+template <typename C>
+size_t	binary_search(C &contenair, size_t pair_size, int value) {
+	size_t	index = (pair_size - 1), odd = 1;
+
+	while (index + pair_size <= contenair.size()) {
+		index += pair_size;
+		odd++;
+	}
+	if (odd % 2 != 0)
+		index -= pair_size;
+	index = index / 2;
+	while (value > contenair.at(index)) {
+		if ((index + pair_size) <= contenair.size() && value < contenair.at(index + pair_size))
+			return (index);
+		else if ((index + pair_size) >= contenair.size())
+			return (index + pair_size);
+		index += pair_size;
+	}
+	index++;
+	while (value < contenair.at(index)) {
+		if ((index - pair_size) > 0 && value > contenair.at(index - pair_size))
+			return (index - pair_size);
+		else if ((index - pair_size) <= 0)
+			return (index - pair_size);
+		else
+			index -= pair_size;
+	}
+	return (0);
+}
+
+int	prochain_jacobsthal_efficace(int j_n, int n) { return (2 * j_n + pow(-1, n)); }
+
 int	count = 0;
+
+std::vector<int>	_jacobsthal_insert_(size_t &start, size_t &pair_size, std::vector<int> &b, std::vector<int> &vector, std::vector<int> &main, std::vector<int> &pend) {
+	std::vector<int>	temp_vec;
+	size_t				index = 0;
+	int					j_n = 1, n = 4, i = 0, actual, range;
+
+	if (count == 1) {
+		while (!b.empty()) {
+			actual = prochain_jacobsthal_efficace(j_n, n); // MODIFIER LE NOM
+			range = actual - j_n;
+			j_n = actual;
+			actual -= 1;
+			while (range > 0) {
+				start = actual * pair_size - pair_size;
+				// while (start < actual * pair_size) {
+				// 	temp_vec.push_back(pend[start]);
+				// 	start++;
+				// }
+				index = binary_search(main, pair_size, (actual * pair_size) - 1);
+				index++;
+				for (size_t i = 0; i < pair_size; i++, index++) {
+					main.insert(main.begin() + index, pend.at(start++));
+				}
+				// temp_vec.clear();
+				b.pop_back();
+				// b.pop_back();
+				actual--, range--, n++;
+			}
+		}
+		vector = main;
+		if (count == 2) {
+			for (size_t i = 0; i < main.size(); i++)
+				std::cout	<< main[i] << " ";
+			exit (0);
+		}
+	}
+	return (main);
+}
+
 void	PmergeMe::_sort_back_(std::vector<int> &vector, size_t pair_size) {
 	std::vector<int>::iterator	it;
-	std::vector<int>			pend, main, temp_vec, b;
-	size_t						start = pair_size, pair = 0, original_size = vector.size();
-	int							j_n = 1, n = 4, b_count = 2, i = 0, temp_saver, actual, range;
+	std::vector<int>			pend, main, b;
+	size_t						start = pair_size, pair = 0;
+	int							b_count = 2, i = 0;
 
 	while (start < vector.size()) {
 		if (pair == 0 || (pair % 2 != 0)) {
 			for (size_t o = (start - pair_size); o < start; o++) {
 				main.push_back(vector[o]);
+				// vector.at(o) = -1;
 			}
 		} else if (pair % 2 == 0) {
 			for (size_t o = (start - pair_size); o < start; o++) {
 				pend.push_back(vector[o]);
+				// vector.at(o) = -1;
+				// main.push_back(-1);
 			}
 			b.push_back(b_count++);
 		}
 		start += pair_size;
 		pair++;
 	}
-	/* Creation d'un vecteur contenant 2, 3, 4... (b2, b3, b4...)
-	 * le but etant de me servir de ce vecteur comme repaire pour
-	 * l'insertion des ranges selon la suite de jacob
-	 * reste a trouver comment se servir de jacob pour l'insertion binaire */
-	int p = 0;
-	if (count == 1) {
-		while (!b.empty()) {
-			actual = prochain_jacobsthal_efficace(j_n, n);
-			range = actual - j_n;
-			j_n = actual;
-			actual -= 1;
-			while (actual > 0) {
-				start = actual * pair_size - pair_size;
-				while (start < actual * pair_size) {
-					temp_vec.push_back(pend[start]);
-					start++;
-				}
-				it = std::lower_bound(vector.begin(), vector.end(), *temp_vec.end());
-				vector.insert(it, temp_vec.begin(), temp_vec.end());
-				temp_vec.clear();
-				// b.pop_back();
-				actual--;
-				for (size_t i = 0; i < vector.size(); i++) {
-					std::cout	<< vector.at(i) << ' ';
-				}
-				exit (0);
-			}
-		}
-		exit (0);
-	}
+	_jacobsthal_insert_(start, pair_size, b, vector, main, pend);
 	count++;
 	// j(n), precedente valeur de jacob, index qui correspond a J(n)
 	// std::cout	<< "pair size: " << pair_size << ";\npending  : ";
@@ -142,6 +186,6 @@ void	PmergeMe::_sort_(void) {
 void	PmergeMe::_launch_(void) {
 	this->_parse_();
 	this->_sort_();
-	// for (size_t i = 0; i < this->_vector.size(); i++)
-	// 	std::cout	<< this->_vector[i] << " ";
+	for (size_t i = 0; i < this->_vector.size(); i++)
+		std::cout	<< this->_vector[i] << " ";
 }
