@@ -104,7 +104,7 @@ std::vector<int>	_jacobsthal_insert_(size_t &start, size_t &pair_size, std::vect
 	size_t				index = 0;
 	int					j_n = 1, n = 4, i = 0, actual, range;
 
-	if (count == 1) {
+	if (count == 1 || count == 2) {
 		while (!b.empty()) {
 			actual = prochain_jacobsthal_efficace(j_n, n); // MODIFIER LE NOM
 			range = actual - j_n;
@@ -112,18 +112,17 @@ std::vector<int>	_jacobsthal_insert_(size_t &start, size_t &pair_size, std::vect
 			actual -= 1;
 			while (range > 0) {
 				start = actual * pair_size - pair_size;
-				// while (start < actual * pair_size) {
-				// 	temp_vec.push_back(pend[start]);
-				// 	start++;
-				// }
-				index = binary_search(main, pair_size, (actual * pair_size) - 1);
-				index++;
-				for (size_t i = 0; i < pair_size; i++, index++) {
-					main.insert(main.begin() + index, pend.at(start++));
+				std::cout	<< count << ": ";
+				for (int i = 0; i < (int)pend.size(); i++) {
+					std::cout	<< pend.at(i) << ' ';
 				}
-				// temp_vec.clear();
+				std::cout	<< '\n';
+				index = binary_search(main, pair_size, pend.at(actual * pair_size - 1));
+				index++;
+				for (size_t i = 0; i < pair_size; i++, index++, start++) {
+					main.insert(main.begin() + index, pend.at(start));
+				}
 				b.pop_back();
-				// b.pop_back();
 				actual--, range--, n++;
 			}
 		}
