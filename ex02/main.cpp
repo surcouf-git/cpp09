@@ -1,5 +1,7 @@
 #include "PmergeMe.hpp"
 
+// int	jacobsthal_generator(int j_n, int n) { return (2 * j_n + static_cast<int>(pow(-1, n))); }
+
 int	main(int argc, char **argv)
 {
 	if (argc < 2) {
