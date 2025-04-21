@@ -190,6 +190,6 @@ void	PmergeMe::_sort_(void) {
 void	PmergeMe::_launch_(void) {
 	this->_parse_();
 	this->_sort_();
-	// for (size_t i = 0; i < this->_vector.size(); i++)
-	// 	std::cout	<< this->_vector[i] << " ";
+	for (size_t i = 0; i < this->_vector.size(); i++)
+		std::cout	<< this->_vector[i] << " ";
 }
