@@ -53,57 +53,54 @@ int	count = 0;
 
 template <typename C>
 size_t	binary_search(C &contenair, size_t pair_size, int value) {
-	size_t	index = (pair_size - 1), odd = 1;
+	size_t					index = 0, odd = 0;
+	C						values;
+	typename C::iterator	it;
+	int	i = 0, to_find = 0, o = 0;
 
-	while (index + pair_size <= contenair.size()) {
-		index += pair_size;
-		odd++;
+	for (size_t i = pair_size - 1; i < contenair.size(); i += pair_size) {
+		values.push_back(contenair.at(i));
+		std::cout	<< values.at(o) << ' ';
+		o++;
 	}
-	if (odd % 2 != 0)
-		index -= pair_size;
-	index = index / 2;
-	if (count == 2) { std::cout	<< value << ' ' << pair_size << '\n'; }
-	while (value > contenair.at(index)) {
-		if ((index + pair_size) <= contenair.size() && value < contenair.at(index + pair_size))
-			return (index);
-		else if ((index + pair_size) >= contenair.size())
-			return (index + pair_size);
-		index += pair_size;
-	} 
-	index++;
-	while (value < contenair.at(index)) {
-		if ((index - pair_size) > 0 && value > contenair.at(index - pair_size))
-			return (index - pair_size);
-		else if ((index - pair_size) <= 0)
-			return (index - pair_size);
-		else
-			index -= pair_size;
-	}
-	return (0);
+	it = std::upper_bound(values.begin(), values.end(), value);
+	// it == values.begin() ? to_find = *it : to_find = *--it;
+	to_find = *it;
+	for (; values.at(i) < to_find; i++) {}
+	std::cout	<< "{" << to_find << "} [" << value << "] " << i  << '/' << *it << "\n";
+	if (i == 0)
+		return (0);
+	return (i * pair_size);
 }
 
 int	jacobsthal_generator(int j_n, int n) { return (2 * j_n + static_cast<int>(pow(-1, n))); }
 
-std::vector<int>	_jacobsthal_insert_(size_t &start, size_t &pair_size, std::vector<int> &b, std::vector<int> &vector, std::vector<int> &main, std::vector<int> &pend) {
+std::vector<int>	_jacobsthal_insert_(size_t &pair_size, std::list<int> &b, std::vector<int> &vector, std::vector<int> &main, std::vector<int> &pend) {
 	std::vector<int>	temp_vec;
-	size_t				index = 0;
-	int					j_n = 1, n = 4, i = 0, actual, range;
+	size_t				index = 0, start = 0;
+	int					j_n = 1, n = 4, i = 0, actual, range, b_popped = 0;
 
 	while (!b.empty()) {
 		actual = jacobsthal_generator(j_n, n);
 		range = actual - j_n;
 		j_n = actual;
 		actual -= 1;
-		if (count == 2)
-			std::cout	<< j_n  << ' ' << b.size() << "<-\n";
+		if (actual > b.front()) {
+			// actual = b.front() - 2;
+			actual = b_popped + 1;
+			range = 1;
+			std::cout	<< b_popped << "-";
+		}
 		while (range > 0) {
 			start = actual * pair_size - pair_size;
-			index = binary_search(main, pair_size, pend.at(actual * pair_size - 1));
-			index++;
+			try {
+			std::cout	<< "B_FRONT: " << b.front() << '\n';
+			index = binary_search(main, pair_size, pend.at(actual * pair_size - 1)); } catch (...) {std::cout	<< "izi " << (actual * pair_size - 1) << ' ' << actual; exit(0); }
 			for (size_t i = 0; i < pair_size; i++, index++, start++) {
 				main.insert(main.begin() + index, pend.at(start));
 			}
-			b.pop_back();
+			b.pop_front();
+			b_popped++;
 			actual--, range--;
 		}
 		n++;
@@ -113,29 +110,32 @@ std::vector<int>	_jacobsthal_insert_(size_t &start, size_t &pair_size, std::vect
 
 void	PmergeMe::_sort_back_(std::vector<int> &vector, size_t pair_size) {
 	std::vector<int>::iterator	it;
-	std::vector<int>			pend, main, excludes, b;
-	size_t						start = 0, pair = 0, both_size = 0;
+	std::vector<int>			pend, main, excludes;
+	std::list<int>				b;
+	size_t						start = 0, pair = 0, both_size = 0, cutter = 0;;
 	int							b_count = 2, i = 0;
+	static bool					first_call = true;
 
-	while (start < vector.size()) {
+	while (start < vector.size() && first_call == false) {
+		if (start + pair_size > vector.size())
+			cutter = start + pair_size - vector.size();
 		if (pair == 0 || (pair % 2 != 0)) {
-			for (size_t o = (start); o < start; o++, i++)
-				try { main.push_back(vector.at(o)); } catch (...) {std::cout << "izi\n"; }
+			for (size_t o = start; o < (start + pair_size) - cutter; o++, i++) {
+				main.push_back(vector.at(o)); if (count == 100) {std::cout	<< vector.at(o) << "<-";} }
 		} else if (pair % 2 == 0) {
-			for (size_t o = (start); o < start; o++, i++)
-				try { pend.push_back(vector.at(o)); } catch (...) {std::cout << "aza: " << o << "\n"; }
+			for (size_t o = start; o < (start + pair_size) - cutter; o++, i++) {
+				pend.push_back(vector.at(o)); if (count == 100) {std::cout	<< vector.at(o) << ' ';} }
 			b.push_back(b_count++);
 		}
 		start += pair_size;
 		pair++;
 	}
-	if (count == 2)
-		std::cout	<< "[" << vector.size() << "] {" << start << "}\n";
-	for (; i < vector.size(); i++) {
+	for (;first_call == false && i < vector.size(); i++) {
 		main.push_back(vector.at(i));
 	}
-	if (count == 2) {
+	if (1) {
 		// std::cout	<< "{" << start << "}\n";
+		std::cout	<< "APPEL:" << count << '\n';
 		std::cout	<< "vector:\n";
 		for (size_t i = 0; i < vector.size(); i++) {
 			std::cout	<< vector.at(i) << ' ';
@@ -151,10 +151,15 @@ void	PmergeMe::_sort_back_(std::vector<int> &vector, size_t pair_size) {
 			std::cout	<< pend.at(i) << ' ';
 		}
 		std::cout	<< '\n';
-		// if (count == 2)
-		exit(0);
+		// if (count == 3)
+		// 	exit(0);
 	}
-	vector = _jacobsthal_insert_(start, pair_size, b, vector, main, pend);
+	try {
+	if (first_call == false)
+		vector = _jacobsthal_insert_(pair_size, b, vector, main, pend);
+	else
+		first_call = false;
+	} catch (...) { std::cout	<< "ici\n"; exit(1); }
 	count++;
 }
 
