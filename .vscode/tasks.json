@@ -7,7 +7,7 @@
             "args": [
                 "-fdiagnostics-color=always",
                 "-g",
-                "${file}",
+                "${fileDirname}/*.cpp",  // Cette ligne compile tous les fichiers .cpp du répertoire
                 "-o",
                 "${fileDirname}/${fileBasenameNoExtension}"
             ],
