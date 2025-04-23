@@ -1,0 +1,5 @@
+---
+triple:          'arm64-apple-darwin'
+binary-path:     '/Users/surcouf/Desktop/github/cpp09/ex02/main'
+relocations:     []
+...
