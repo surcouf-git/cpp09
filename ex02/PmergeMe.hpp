@@ -1,12 +1,15 @@
 #pragma once
 
+#include <algorithm>
 #include <iostream>
+#include <iomanip>
 #include <cstdlib>
 #include <sstream>
-#include <vector>
 #include <cctype>
-#include <list>
+#include <vector>
+#include <ctime>
 #include <deque>
+#include <list>
 
 class	PmergeMe
 {

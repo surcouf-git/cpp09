@@ -1,7 +1,5 @@
 #include "PmergeMe.hpp"
 
-#include <algorithm>
-
 PmergeMe::PmergeMe(void) {}
 
 PmergeMe::PmergeMe(char **argv) : _argv(argv) {}
@@ -16,7 +14,7 @@ void	PmergeMe::_parse_(void) {
 	std::string			line;
 	std::stringstream	stream;
 	char				**argv = this->_argv;
-	int					i = 0, o = 1;
+	int					i = 0, o = 1, dbl = 0, vec_size = static_cast<int>(this->_vector.size());
 
 	while (argv && argv[o]) {
 		i = 0;
@@ -34,6 +32,18 @@ void	PmergeMe::_parse_(void) {
 	}
 	if (o < 2)
 		throw (std::runtime_error("Error"));
+	o = 0;
+	(void)dbl;
+	while (o < vec_size) {
+		dbl = this->_vector.at(o);
+		i = o + 1;
+		while (i < vec_size) {
+			if (dbl == this->_vector.at(i))
+				throw (std::runtime_error("Error"));
+			i++;
+		}
+		o++;
+	}
 }
 
 template <typename C>
@@ -52,19 +62,26 @@ void	swap_range(C &contenair, size_t end, size_t pair_size, size_t start) {
 
 template <typename C>
 size_t	binary_search(C &contenair, size_t pair_size, int value) {
-	C						values;
 	typename C::iterator	it;
-	int	i = 0;
-	int		to_find = 0;
+	C						values;
+	size_t					contenair_size = contenair.size();
+	int						i = 0, to_find = 0, upper = 0;
 
-	for (size_t i = pair_size - 1; i < contenair.size(); i += pair_size)
+	for (size_t i = pair_size - 1; i < contenair_size; i += pair_size)
 		values.push_back(contenair.at(i));
-	it = std::upper_bound(values.begin(), values.end(), value);
-	to_find = *it;
-	for (; static_cast<int>(values.at(i)) < to_find; i++) {}
+	it = values.end();
+	--it;
+	if (values.size() > 0 && value > *it) {
+		to_find = *it;
+		upper = 1;
+	} else {
+		it = std::upper_bound(values.begin(), values.end(), value);
+		to_find = *it;
+	}
+	for (i = 0; values.at(i) < to_find; i++) {}
 	if (i == 0)
 		return (0);
-	return (i * pair_size);
+	return ((i + upper) * pair_size);
 }
 
 int	jacobsthal_generator(int j_n, int n) { return (2 * j_n + pow(-1, n)); }
@@ -151,16 +168,80 @@ void	make_pairs(C &contenair, size_t pair_size) {
 	sort_back<C>(contenair, pair_size);
 }
 
-void	sort(std::vector<int> &vector, std::deque<int> &deque) {
-	make_pairs<std::vector<int>>(vector, 1);
-	make_pairs<std::deque<int>>(deque, 1);
+#include <ctime> // Pour mesurer le temps en C++98
+
+void sort(std::vector<int> &vector, std::deque<int> &deque) {
+	// Les mesures de temps seront faites dans la fonction _launch_
+	make_pairs< std::vector<int> >(vector, 1);
+	make_pairs< std::deque<int> >(deque, 1);
 }
 
-void	PmergeMe::_launch_(void) {
+void PmergeMe::_launch_(void) {
+	size_t	size;
+
 	this->_parse_();
+	size = this->_vector.size();
+	std::cout << "Before: ";
+	for (size_t i = 0; i < size; i++)
+		std::cout << this->_vector.at(i) << ' ';
+	std::cout << '\n';
+
+	// Créer des copies pour mesurer séparément
+	std::deque<int>		deque_copy = this->_deque;
+	std::vector<int>	vector_copy = this->_vector;
+
+	// Mesure du temps pour vector
+	clock_t start_vector = clock();
+	make_pairs< std::vector<int> >(vector_copy, 1);
+	clock_t end_vector = clock();
+
+	// Mesure du temps pour deque
+	clock_t start_deque = clock();
+	make_pairs< std::deque<int> >(deque_copy, 1);
+	clock_t end_deque = clock();
+
+	// Calculer les temps en microsecondes
+	double vector_time = (double)(end_vector - start_vector) * 1000000 / CLOCKS_PER_SEC;
+	double deque_time = (double)(end_deque - start_deque) * 1000000 / CLOCKS_PER_SEC;
+
+	// Trier les conteneurs originaux pour l'affichage
 	sort(this->_vector, this->_deque);
-	if (std::is_sorted(_vector.begin(), _vector.end()))
-		std::cout	<< "Vector sorted\n";
-	if (std::is_sorted(_deque.begin(), _deque.end()))
-		std::cout	<< "Deque sorted\n";
+
+	std::cout << "After: ";
+	for (size_t i = 0; i < size; i++)
+		std::cout << this->_vector.at(i) << ' ';
+	std::cout << '\n';
+
+	// Afficher les temps avec suffisamment de précision
+	std::cout << "Time to process a range of " << size << " elements with std::vector : " 
+			  << std::fixed << std::setprecision(5) << vector_time << " us\n";
+	std::cout << "Time to process a range of " << size << " elements with std::deque : " 
+			  << std::fixed << std::setprecision(5) << deque_time << " us\n";
 }
+
+// void	sort(std::vector<int> &vector, std::deque<int> &deque) {
+// 	make_pairs< std::vector<int> >(vector, 1);
+// 	make_pairs< std::deque<int> >(deque, 1);
+// }
+
+// void	PmergeMe::_launch_(void) {
+// 	size_t	size;
+
+// 	this->_parse_();
+// 	size = this->_vector.size();
+// 	std::cout	<< "Before: ";
+// 	for (size_t i = 0; i < size; i++)
+// 		std::cout	<< this->_vector.at(i) << ' ';
+// 	std::cout	<< '\n';
+// 	sort(this->_vector, this->_deque);
+// 	std::cout	<< "After: ";
+// 	for (size_t i = 0; i < size; i++)
+// 		std::cout	<< this->_vector.at(i) << ' ';
+// 	if (std::is_sorted(this->_vector.begin(), this->_vector.end()))
+// 		std::cout	<< "Sorted !";
+// 	std::cout	<< "\n";
+// 	std::cout	<< "Time to process a range of " << size << " elements with vector: ";
+// 	std::cout	<< "--time--\n";
+// 	std::cout	<< "Time to process a range of " << size << " elements with deque: ";
+// 	std::cout	<< "--time--\n";
+// }
