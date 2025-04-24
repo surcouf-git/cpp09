@@ -79,6 +79,8 @@
 		"semaphore": "cpp",
 		"__nullptr": "cpp",
 		"__tree": "cpp",
-		"list": "cpp"
+		"list": "cpp",
+		"valarray": "cpp",
+		"filesystem": "cpp"
 	}
 }

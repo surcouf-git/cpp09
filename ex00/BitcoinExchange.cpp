@@ -8,7 +8,16 @@
 
 BitcoinExchange::BitcoinExchange(void) {}
 
-BitcoinExchange::~BitcoinExchange(void) {}
+BitcoinExchange::~BitcoinExchange(void) {
+	std::map<int, t_data*>::iterator	it;
+
+	for (it = this->_input.begin(); it != this->_input.end(); ++it) {
+		if (it->second) {
+			delete (it->second);
+			it->second = NULL;
+		}
+	}
+}
 
 BitcoinExchange::BitcoinExchange(const BitcoinExchange &other) : _csv(other._csv), _input(other._input) {}
 
@@ -20,10 +29,9 @@ BitcoinExchange	&BitcoinExchange::operator=(const BitcoinExchange &other) {
 	return (*this);
 }
 
-//PARSING
-
 t_data	*BitcoinExchange::new_data(const std::string &str, float multiplier) {
-	t_data *data = new t_data;
+	t_data	*data = new t_data;
+
 	data->str = str;
 	data->multiplier = multiplier;
 	return (data);
@@ -45,9 +53,9 @@ void	BitcoinExchange::find_and_display(void) {
 					break ;
 				}
 			}
-		} else {
-			std::cout	<< _input_it->second->str << '\n';
 		}
+		else
+			std::cout	<< _input_it->second->str << '\n';
 	}
 }
 
@@ -73,7 +81,7 @@ float	BitcoinExchange::extract_mutliplier(std::string &s_multiplier, const int &
 		throw (-1);
 	}
 	multiplier = std::atof(s_multiplier.c_str());
-	if (multiplier < 0 || multiplier > std::numeric_limits<int>::max() || multiplier > 1000) {
+	if (multiplier < 1 || multiplier > std::numeric_limits<int>::max() || multiplier > 1000) {
 		msg = (multiplier < 0) ? "Error: not a positive number." : "Error: too large a number.";
 		this->_input.insert(std::make_pair(count, new_data(msg, -1.0f)));
 		throw (-1);
@@ -121,7 +129,16 @@ bool	BitcoinExchange::isFloat(const std::string &string) {
 
 size_t	BitcoinExchange::find_pipe(std::string	&date, std::string &current_line, const int &count) {
 	size_t		pipe_pos;
+	int			dbl = 0;
 
+	for (size_t i = 0; i < current_line.size(); i++) {
+		if (current_line.at(i) == '|')
+			dbl++;
+	}
+	if (dbl > 1) {
+		this->_input.insert(std::make_pair(count, new_data("Error: bad input => " + current_line, -1.0f)));
+		throw (-1);
+	}
 	pipe_pos = current_line.find('|');
 	if (pipe_pos == std::string::npos) {
 		this->_input.insert(std::make_pair(count, new_data("Error: bad input => " + current_line, -1.0f)));
@@ -131,14 +148,14 @@ size_t	BitcoinExchange::find_pipe(std::string	&date, std::string &current_line, 
 	return (pipe_pos);
 }
 
-void	BitcoinExchange::delete_whitespaces(std::string &string) {
+void	BitcoinExchange::delete_whitespaces(std::string &string, const int &count) {
 	size_t	start = string.find_first_not_of(" \t\n\r\f\v|");
 	size_t	end = string.find_last_not_of(" \t\n\r\f\v|");
 
 	if (start != std::string::npos) {
 		string = string.substr(start, end - start + 1);
 	} else {
-		this->_input.insert(std::make_pair(-1.0f, new_data("Error: bad input => " + string, -1.0f)));
+		this->_input.insert(std::make_pair(count, new_data("Error: bad input => " + string, -1.0f)));
 		throw (-1);
 	}
 }
@@ -149,6 +166,10 @@ void	BitcoinExchange::check_format(std::string &date, const int &count) {
 	std::stringstream	stream(date);
 	std::string			tab[3], line;
 
+	if (date < "2009-01-02") {
+		this->_input.insert(std::make_pair(count, new_data("Error: bad input => " + date, -1.0f)));
+		throw (-1);
+	}
 	if (date.at(4) != '-' || date.at(7) != '-') {
 		this->_input.insert(std::make_pair(count, new_data("Error: bad input => " + date, -1.0f)));
 		throw (-1);
@@ -193,7 +214,7 @@ void	BitcoinExchange::parse_line(std::string current_line, const int &count) {
 
 	//extraire la date
 	pipe_pos = this->find_pipe(date, current_line, count);
-	this->delete_whitespaces(date);
+	this->delete_whitespaces(date, count);
 	if (date.length() != 10) {
 		this->_input.insert(std::make_pair(count, new_data("Error: bad input => " + date, -1.0f)));
 		throw (-1);
@@ -201,7 +222,7 @@ void	BitcoinExchange::parse_line(std::string current_line, const int &count) {
 	this->check_format(date, count);
 	//extraire la valeur
 	s_multiplier = current_line.substr(pipe_pos, current_line.find_last_not_of(" \t\n\r\f\v"));
-	this->delete_whitespaces(s_multiplier);
+	this->delete_whitespaces(s_multiplier, count);
 	multiplier = this->extract_mutliplier(s_multiplier, count);
 	//remplir map
 	this->_input.insert(std::make_pair(count, new_data(date, multiplier)));
@@ -223,7 +244,12 @@ void	BitcoinExchange::fill_input_map(void) {
 	}
 }
 
-void	BitcoinExchange::handleInfile(std::string infile) {
+void	BitcoinExchange::launch(std::string infile) {
+	size_t	i = 0;
+
+	while (i < infile.size()) { i++; }
+	if (i < 5 || (i < 4 && infile[i] != 't' && infile[i-1] != 'x' && infile[i-2] != 't' && infile[i-3] != '.'))
+		throw (std::runtime_error("Error: wrong format file"));
 	this->_infile.open(infile.c_str());
 	this->_infile_csv.open("data.csv");
 	if (!this->_infile)

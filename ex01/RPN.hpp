@@ -17,7 +17,6 @@ class RPN
 
 		void	_do_(void);
 		void	_fill_(void);
-		void	_swap_(const char c);
 		void	_parse_(std::string &line);
 		int		_calculate_(int n1, int n2, char operat);
 

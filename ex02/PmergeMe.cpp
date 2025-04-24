@@ -4,11 +4,18 @@ PmergeMe::PmergeMe(void) {}
 
 PmergeMe::PmergeMe(char **argv) : _argv(argv) {}
 
-PmergeMe::PmergeMe(const PmergeMe &other) { (void)other; }
+PmergeMe::PmergeMe(const PmergeMe &other) : _deque(other._deque), _vector(other._vector), _argv(other._argv) { (void)other; }
 
 PmergeMe::~PmergeMe(void) {}
 
-PmergeMe	&PmergeMe::operator=(const PmergeMe &other) { (void)other; return (*this); }
+PmergeMe	&PmergeMe::operator=(const PmergeMe &other) {
+	if (this != &other) {
+		this->_argv = other._argv;
+		this->_vector = other._vector;
+		this->_deque = other._deque;
+	}
+	return (*this);
+}
 
 void	PmergeMe::_parse_(void) {
 	std::string			line;
@@ -152,8 +159,10 @@ void	sort_back(C &contenair, size_t pair_size) {
 		contenair.push_back(excludes.at(i));
 }
 
+/*Anciennement make_pair*/
+
 template <typename C>
-void	make_pairs(C &contenair, size_t pair_size) {
+void	sort(C &contenair, size_t pair_size) {
 	if (pair_size > (contenair.size() / 2))
 		return ;
 	size_t	end = (pair_size - 1);
@@ -163,21 +172,19 @@ void	make_pairs(C &contenair, size_t pair_size) {
 			swap_range<C>(contenair, end, pair_size, ((end + 1) - pair_size));
 		end += (pair_size * 2);
 	}
-	make_pairs<C>(contenair, pair_size * 2);
+	sort<C>(contenair, pair_size * 2);
 	//Apres le dernier appel recursif
 	sort_back<C>(contenair, pair_size);
 }
 
-#include <ctime> // Pour mesurer le temps en C++98
-
-void sort(std::vector<int> &vector, std::deque<int> &deque) {
-	// Les mesures de temps seront faites dans la fonction _launch_
-	make_pairs< std::vector<int> >(vector, 1);
-	make_pairs< std::deque<int> >(deque, 1);
-}
-
 void PmergeMe::_launch_(void) {
 	size_t	size;
+	double	vector_time;
+	double	deque_time;
+	clock_t	start_vector;
+	clock_t	end_vector;
+	clock_t	start_deque;
+	clock_t	end_deque;
 
 	this->_parse_();
 	size = this->_vector.size();
@@ -186,62 +193,21 @@ void PmergeMe::_launch_(void) {
 		std::cout << this->_vector.at(i) << ' ';
 	std::cout << '\n';
 
-	// Créer des copies pour mesurer séparément
-	std::deque<int>		deque_copy = this->_deque;
-	std::vector<int>	vector_copy = this->_vector;
+	start_vector = clock();
+	sort< std::vector<int> >(this->_vector, 1);
+	end_vector = clock();
+	start_deque = clock();
+	sort< std::deque<int> >(this->_deque, 1);
+	end_deque = clock();
 
-	// Mesure du temps pour vector
-	clock_t start_vector = clock();
-	make_pairs< std::vector<int> >(vector_copy, 1);
-	clock_t end_vector = clock();
-
-	// Mesure du temps pour deque
-	clock_t start_deque = clock();
-	make_pairs< std::deque<int> >(deque_copy, 1);
-	clock_t end_deque = clock();
-
-	// Calculer les temps en microsecondes
-	double vector_time = (double)(end_vector - start_vector) * 1000000 / CLOCKS_PER_SEC;
-	double deque_time = (double)(end_deque - start_deque) * 1000000 / CLOCKS_PER_SEC;
-
-	// Trier les conteneurs originaux pour l'affichage
-	sort(this->_vector, this->_deque);
-
+	vector_time = (double)(end_vector - start_vector)  / CLOCKS_PER_SEC;
+	deque_time = (double)(end_deque - start_deque) / CLOCKS_PER_SEC;
 	std::cout << "After: ";
 	for (size_t i = 0; i < size; i++)
 		std::cout << this->_vector.at(i) << ' ';
-	std::cout << '\n';
-
-	// Afficher les temps avec suffisamment de précision
-	std::cout << "Time to process a range of " << size << " elements with std::vector : " 
-			  << std::fixed << std::setprecision(5) << vector_time << " us\n";
-	std::cout << "Time to process a range of " << size << " elements with std::deque : " 
-			  << std::fixed << std::setprecision(5) << deque_time << " us\n";
+	std::cout	<< '\n';
+	std::cout	<< "Time to process a range of " << size << " elements with std::vector : " 
+				<< std::fixed << std::setprecision(6) << vector_time << " s\n";
+	std::cout	<< "Time to process a range of " << size << " elements with std::deque : " 
+			 	<< std::fixed << std::setprecision(6) << deque_time << " s\n";
 }
-
-// void	sort(std::vector<int> &vector, std::deque<int> &deque) {
-// 	make_pairs< std::vector<int> >(vector, 1);
-// 	make_pairs< std::deque<int> >(deque, 1);
-// }
-
-// void	PmergeMe::_launch_(void) {
-// 	size_t	size;
-
-// 	this->_parse_();
-// 	size = this->_vector.size();
-// 	std::cout	<< "Before: ";
-// 	for (size_t i = 0; i < size; i++)
-// 		std::cout	<< this->_vector.at(i) << ' ';
-// 	std::cout	<< '\n';
-// 	sort(this->_vector, this->_deque);
-// 	std::cout	<< "After: ";
-// 	for (size_t i = 0; i < size; i++)
-// 		std::cout	<< this->_vector.at(i) << ' ';
-// 	if (std::is_sorted(this->_vector.begin(), this->_vector.end()))
-// 		std::cout	<< "Sorted !";
-// 	std::cout	<< "\n";
-// 	std::cout	<< "Time to process a range of " << size << " elements with vector: ";
-// 	std::cout	<< "--time--\n";
-// 	std::cout	<< "Time to process a range of " << size << " elements with deque: ";
-// 	std::cout	<< "--time--\n";
-// }

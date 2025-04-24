@@ -2,11 +2,18 @@
 
 RPN::RPN(void) {}
 
-RPN::RPN(const RPN &other) { (void)other; }
+RPN::RPN(const RPN &other) : _resultStack(other._resultStack), _stringStack(other._stringStack), _revStringStack(other._revStringStack) { (void)other; }
 
 RPN::~RPN(void) {}
 
-RPN	RPN::operator=(const RPN &other) { (void)other; return (*this); }
+RPN	RPN::operator=(const RPN &other) {
+	if (this != &other) {
+		this->_resultStack = other._resultStack;
+		this->_revStringStack = other._revStringStack;
+		this->_stringStack = other._stringStack;
+	}
+	return (*this);
+}
 
 void	RPN::_parse_(std::string &line) {
 	std::string			nwline;
@@ -80,6 +87,8 @@ void	RPN::_do_(void) {
 					n2 = this->_resultStack.top();
 					this->_resultStack.pop();
 					n1 = this->_resultStack.top();
+					if (n1 == 0 || n2 == 0)
+						throw (std::runtime_error("Error"));
 					this->_resultStack.pop();
 					this->_resultStack.push(this->_calculate_(n1, n2, node.at(i)));
 				}

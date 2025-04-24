@@ -12,7 +12,7 @@ int	main(int argc, char **argv)
 	try
 	{
 		BitcoinExchange	btc;
-		btc.handleInfile(argv[1]);
+		btc.launch(argv[1]);
 	}
 	catch (std::exception &exception)
 	{

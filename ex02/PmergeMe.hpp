@@ -5,6 +5,8 @@
 #include <iomanip>
 #include <cstdlib>
 #include <sstream>
+#include <complex>
+#include <valarray>
 #include <cctype>
 #include <vector>
 #include <ctime>
