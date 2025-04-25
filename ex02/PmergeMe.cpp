@@ -21,7 +21,7 @@ void	PmergeMe::_parse_(void) {
 	std::string			line;
 	std::stringstream	stream;
 	char				**argv = this->_argv;
-	int					i = 0, o = 1, dbl = 0, vec_size = static_cast<int>(this->_vector.size());
+	int					i = 0, o = 1, dbl = 0, vec_size;
 
 	while (argv && argv[o]) {
 		i = 0;
@@ -40,7 +40,7 @@ void	PmergeMe::_parse_(void) {
 	if (o < 2)
 		throw (std::runtime_error("Error"));
 	o = 0;
-	(void)dbl;
+	vec_size = static_cast<int>(this->_vector.size());
 	while (o < vec_size) {
 		dbl = this->_vector.at(o);
 		i = o + 1;
@@ -210,4 +210,6 @@ void PmergeMe::_launch_(void) {
 				<< std::fixed << std::setprecision(6) << vector_time << " s\n";
 	std::cout	<< "Time to process a range of " << size << " elements with std::deque : " 
 			 	<< std::fixed << std::setprecision(6) << deque_time << " s\n";
+	if (std::is_sorted(_vector.begin(), _vector.end()))
+		std::cout	<< "SORTED\n";
 }

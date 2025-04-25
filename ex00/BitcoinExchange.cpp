@@ -248,8 +248,6 @@ void	BitcoinExchange::launch(std::string infile) {
 	size_t	i = 0;
 
 	while (i < infile.size()) { i++; }
-	if (i < 5 || (i < 4 && infile[i] != 't' && infile[i-1] != 'x' && infile[i-2] != 't' && infile[i-3] != '.'))
-		throw (std::runtime_error("Error: wrong format file"));
 	this->_infile.open(infile.c_str());
 	this->_infile_csv.open("data.csv");
 	if (!this->_infile)

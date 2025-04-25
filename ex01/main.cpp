@@ -6,7 +6,7 @@ int	main(int argc, char **argv)
 	RPN	rpn;
 
 	if (argc != 2) {
-		std::cerr	<< "Unsage: ./RPN \"...\"";
+		std::cerr	<< "Usage: ./RPN \"...\"";
 		return (1);
 	}
 	std::string	line(argv[1]);
