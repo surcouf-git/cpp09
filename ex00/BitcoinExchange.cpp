@@ -86,8 +86,8 @@ float	BitcoinExchange::extract_mutliplier(std::string &s_multiplier, const int &
 		throw (-1);
 	}
 	multiplier = std::atof(s_multiplier.c_str());
-	if (multiplier < 1 || multiplier > std::numeric_limits<int>::max() || multiplier > 1000) {
-		msg = (multiplier < 0) ? "Error: not a positive number." : "Error: too large number.";
+	if (multiplier <= 0 || multiplier > std::numeric_limits<int>::max() || multiplier > 1000) {
+		msg = (multiplier <= 0) ? "Error: not a positive number." : "Error: too large number.";
 		this->_input.insert(std::make_pair(count, new_data(msg, -1.0f)));
 		throw (-1);
 	}
