@@ -1,6 +1,7 @@
 #include "BitcoinExchange.hpp"
 
 #include <iostream>
+#include <iomanip>
 #include <sstream>
 #include <string>
 #include <cstdlib>
@@ -51,6 +52,10 @@ void	BitcoinExchange::find_and_display(void) {
 					result = (_input_it->second->multiplier * _csv_it->second);
 					std::cout	<< _input_it->second->str << " => " << result << '\n';
 					break ;
+				} else if (_input_it->second->str >= "2022-03-29") {
+					result = (_input_it->second->multiplier * 47115.93);
+					std::cout	<< _input_it->second->str << " => " << result << '\n';
+					break ;
 				}
 			}
 		}
@@ -82,7 +87,7 @@ float	BitcoinExchange::extract_mutliplier(std::string &s_multiplier, const int &
 	}
 	multiplier = std::atof(s_multiplier.c_str());
 	if (multiplier < 1 || multiplier > std::numeric_limits<int>::max() || multiplier > 1000) {
-		msg = (multiplier < 0) ? "Error: not a positive number." : "Error: too large a number.";
+		msg = (multiplier < 0) ? "Error: not a positive number." : "Error: too large number.";
 		this->_input.insert(std::make_pair(count, new_data(msg, -1.0f)));
 		throw (-1);
 	}
@@ -171,10 +176,6 @@ void	BitcoinExchange::check_format(std::string &date, const int &count) {
 		throw (-1);
 	}
 	if (date.at(4) != '-' || date.at(7) != '-') {
-		this->_input.insert(std::make_pair(count, new_data("Error: bad input => " + date, -1.0f)));
-		throw (-1);
-	}
-	if (date > "2022-03-25") {
 		this->_input.insert(std::make_pair(count, new_data("Error: bad input => " + date, -1.0f)));
 		throw (-1);
 	}
