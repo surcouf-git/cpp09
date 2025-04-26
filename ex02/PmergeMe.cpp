@@ -210,6 +210,6 @@ void PmergeMe::_launch_(void) {
 				<< std::fixed << std::setprecision(6) << vector_time << " s\n";
 	std::cout	<< "Time to process a range of " << size << " elements with std::deque : " 
 			 	<< std::fixed << std::setprecision(6) << deque_time << " s\n";
-	if (std::is_sorted(_vector.begin(), _vector.end()))
-		std::cout	<< "SORTED\n";
+	// if (std::is_sorted(_vector.begin(), _vector.end()))
+	// 	std::cout	<< "SORTED\n";
 }

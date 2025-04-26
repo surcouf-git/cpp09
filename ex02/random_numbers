@@ -1,1 +1,1 @@
-`jot 5000 1 5000 | sort -R | head -n 3000 | tr '\n' ' '`
+c2r11p1% ./PmergeMe `shuf -i 1-5000 | head -n 3000 | tr "\n" " "`

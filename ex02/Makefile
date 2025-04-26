@@ -1,7 +1,7 @@
 NAME = PmergeMe
 
 CPP = c++
-CPPFLAGS = -Wall -Wextra -Werror -std=c++98 -g # -fsanitize=address -fno-omit-frame-pointer
+CPPFLAGS = -Wall -Wextra -Werror -g --std=c++98 # -fsanitize=address -fno-omit-frame-pointer
 
 SRCS = PmergeMe.cpp main.cpp
 OBJ_DIR = obj
